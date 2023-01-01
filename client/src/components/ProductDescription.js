@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Container, Form, Button, Card } from 'react-bootstrap';
+const { Configuration, OpenAIApi } = require('openai');
 
-const { Configuration, OpenAIApi } = require('openai')
 
 class ProductDescription extends Component {
     constructor() {
@@ -22,9 +22,11 @@ class ProductDescription extends Component {
         const configuration = new Configuration({
             apiKey: process.env.OPENAI_API_KEY,
         });
+        
         const openai = new OpenAIApi(configuration);
 
-        openai.createCompletion("text-davinci-001", {
+        openai.createCompletion({
+            model: "text-davinci-001",
             prompt: `Write a detailed, professional description for ${formDataObj.productName}`,
             temperature: 0.8,
             max_tokens: 256,
@@ -36,7 +38,7 @@ class ProductDescription extends Component {
                 heading: `AI Product Descripton Suggestions for: ${formDataObj.productName}`,
                 response: `${response.data.choices[0].text}`
             })
-        })
+        }).catch((error) => console.log("Error Here"))
     }
     render() {
         return (
