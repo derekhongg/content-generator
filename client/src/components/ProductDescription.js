@@ -14,31 +14,37 @@ class ProductDescription extends Component {
 
     onFormSubmit = e => {
         e.preventDefault();
-
+        const OPENAI_API_KEY = ''
         const formData = new FormData(e.target);
         let formDataObj = Object.fromEntries(formData.entries())
         console.log(formDataObj.productName)
 
-        const configuration = new Configuration({
-            apiKey: process.env.OPENAI_API_KEY,
-        });
-        
-        const openai = new OpenAIApi(configuration);
-
-        openai.createCompletion({
-            model: "text-davinci-001",
-            prompt: `Write a detailed, professional description for ${formDataObj.productName}`,
-            temperature: 0.8,
-            max_tokens: 256,
-            top_p: 1,
-            frequency_penalty: 0,
-            presence_penalty: 0,
-        }).then((response) => {
-            this.setState({
-                heading: `AI Product Descripton Suggestions for: ${formDataObj.productName}`,
-                response: `${response.data.choices[0].text}`
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + OPENAI_API_KEY
+            },
+            body: JSON.stringify({
+                'model': "text-davinci-001",
+                'prompt': `Write me a informative and professional product description for ${formDataObj.productName}`,
+                'temperature': 0.8,
+                "max_tokens": 256,
+                "top_p": 1,
+                "frequency_penalty": 0,
+                "presence_penalty": 0
             })
-        }).catch((error) => console.log("Error Here"))
+        };
+        fetch('https://api.openai.com/v1/completions', requestOptions)
+            .then((response) => {
+                this.setState({
+                    heading: `AI Product Description for: ${formDataObj.productName}`,
+                    response: `${response.data}`
+                })
+            })
+            .catch(err => {
+                console.log(err);
+            });
     }
     render() {
         return (
@@ -46,9 +52,7 @@ class ProductDescription extends Component {
                 <Container>
                     <h1>Generate Product Descriptions</h1>
                     <h4>Generate Product Descriptions for any type of products, simply enter the name to recieve a response!</h4>
-
                     <br />
-
                     <Form onSubmit={this.onFormSubmit}>
                         <Form.Group className="mb-3" controlId="formBasicEmail">
                             <Form.Label>What Product Would you like a description for?</Form.Label>
@@ -60,7 +64,6 @@ class ProductDescription extends Component {
                                 Enter as much information as possible for an accurate description.
                             </Form.Text>
                         </Form.Group>
-
                         <Button variant='primary' size='lg' type='submit'>
                             Get AI Suggestions
                         </Button>
