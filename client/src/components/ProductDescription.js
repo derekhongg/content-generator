@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { Container, Form, Button, Card } from 'react-bootstrap';
-const { Configuration, OpenAIApi } = require('openai');
 
 
 class ProductDescription extends Component {
@@ -14,7 +13,6 @@ class ProductDescription extends Component {
 
     onFormSubmit = e => {
         e.preventDefault();
-        const OPENAI_API_KEY = ''
         const formData = new FormData(e.target);
         let formDataObj = Object.fromEntries(formData.entries())
         console.log(formDataObj.productName)
@@ -23,10 +21,10 @@ class ProductDescription extends Component {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + OPENAI_API_KEY
+                'Authorization': 'Bearer ' + String(process.env.OPENAI_API_KEY)
             },
             body: JSON.stringify({
-                'model': "text-davinci-001",
+                'model': "text-davinci-003",
                 'prompt': `Write me a informative and professional product description for ${formDataObj.productName}`,
                 'temperature': 0.8,
                 "max_tokens": 256,
@@ -35,21 +33,30 @@ class ProductDescription extends Component {
                 "presence_penalty": 0
             })
         };
-        fetch('https://api.openai.com/v1/completions', requestOptions)
-            .then((response) => {
-                this.setState({
-                    heading: `AI Product Description for: ${formDataObj.productName}`,
-                    response: `${response.data}`
+        console.log(requestOptions.body);
+
+        if (formData === "") {
+            return
+        } else {
+            fetch('https://api.openai.com/v1/completions', requestOptions)
+                .then((response) => {
+                    return response.json()
                 })
-            })
-            .catch(err => {
-                console.log(err);
-            });
+                .then((data) => {
+                    this.setState({
+                        heading: `AI Product Description for: ${formDataObj.productName}`,
+                        response: `${data.choices[0].text.replace(/(\r\n|\n|\r)/gm, " ").split(/\s{2,8}/)[1]}`
+                    })
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+        }
     }
     render() {
         return (
             <div>
-                <Container>
+                <Container className="mt-3">
                     <h1>Generate Product Descriptions</h1>
                     <h4>Generate Product Descriptions for any type of products, simply enter the name to recieve a response!</h4>
                     <br />
@@ -85,5 +92,3 @@ class ProductDescription extends Component {
 }
 
 export default ProductDescription
-
-

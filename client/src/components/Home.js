@@ -5,7 +5,7 @@ import Display from './Display';
 function Home() {
     return (
         <div>
-            <Container>
+            <Container className='mt-4'>
                 <h1>Online Artificial Intelligence AI (API) With OpenAI</h1>
                 <p>Start by picking any of these use cases below and start generating AI content.</p>
                 <br />
